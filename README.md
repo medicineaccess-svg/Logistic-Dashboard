@@ -2,6 +2,8 @@
 
 Live tracking of NPP (Named Patient Program) and Recordati / rare-disease medicine shipments, from **Inquiry** to **POD received**, with role-based access.
 
+**Live:** https://ikris-logistics-control-tower.vercel.app · Database: Supabase project `ikris-logistics-control-tower` (ap-south-1)
+
 **Stack:** React 18 + TypeScript + Vite · Tailwind CSS · Recharts · React Hook Form + Zod · React Toastify · Supabase (Postgres, Auth, RLS, Realtime, Storage) · Vercel.
 
 ## Roles
@@ -71,4 +73,4 @@ Rules (see `scripts/migrate_sheets.py`): latest dated column wins over "Overall 
 
 ## Google Sheets mirror
 
-Supabase is the source of truth. A one-way export copies shipments to a tab in each department's sheet (NPP rows → NPP sheet, Recordati rows → Recordati sheet) on a schedule; edits made in the sheet are not read back.
+Supabase is the source of truth. A Claude scheduled task (08:41 and 17:41 IST daily) copies shipments into the tab **CT Export (Supabase)** of each department's own sheet (NPP rows → NPP UPDATE sheet, Recordati rows → Recordati sheet). It is one-way: edits made in the sheet are not read back.
