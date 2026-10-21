@@ -148,7 +148,7 @@ export function Shipments() {
     const start = (page - 1) * size;
     const { data, error, count: c } = await buildQuery().range(start, start + size - 1);
     if (error) notify.error(error, 'list-load');
-    setRows((data as Row[] | null) ?? []);
+    setRows((data as unknown as Row[] | null) ?? []);
     setCount(c ?? 0);
     setLoading(false);
   }, [buildQuery, page, size]);
@@ -162,7 +162,7 @@ export function Shipments() {
     let oq = supabase.from('shipments').select('owner_name').not('owner_name', 'is', null).limit(5000);
     if (dept) oq = oq.eq('department', dept);
     oq.then(({ data }) => {
-      const set = new Set(((data as { owner_name: string }[] | null) ?? []).map((r) => r.owner_name));
+      const set = new Set(((data as unknown as { owner_name: string }[] | null) ?? []).map((r) => r.owner_name));
       setOwners([...set].sort());
     });
   }, [dept]);
@@ -180,7 +180,7 @@ export function Shipments() {
   const exportCsv = async () => {
     const { data, error } = await buildQuery(true).range(0, 4999);
     if (error) return notify.error(error);
-    const list = (data as Row[]) ?? [];
+    const list = (data as unknown as Row[]) ?? [];
     downloadCsv(`shipments-${new Date().toISOString().slice(0, 10)}.csv`, list as unknown as Record<string, unknown>[], [
       { key: 'shipment_code', label: 'Shipment ID' },
       { key: 'department', label: 'Department' },

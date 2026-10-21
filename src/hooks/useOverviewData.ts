@@ -58,8 +58,8 @@ export function useOverviewData() {
     }
     const [{ data, error: e1 }, { data: sdata, error: e2 }] = await Promise.all([q, sq]);
     if (e1 || e2) setError(true);
-    setRows((data as OverviewRow[] | null) ?? []);
-    setStock((sdata as StockItem[] | null) ?? []);
+    setRows((data as unknown as OverviewRow[] | null) ?? []);
+    setStock((sdata as unknown as StockItem[] | null) ?? []);
     setLoading(false);
   }, [scope]);
 

@@ -31,7 +31,7 @@ export function ShipmentDetail() {
   const load = useCallback(async () => {
     const { data, error } = await supabase.from('shipment_overview').select('*').eq('shipment_code', code ?? '').maybeSingle();
     if (error) notify.error(error, 'detail');
-    const row = data as ShipmentOverview | null;
+    const row = data as unknown as ShipmentOverview | null;
     setS(row);
     if (row) {
       const [u, p, d] = await Promise.all([
@@ -39,9 +39,9 @@ export function ShipmentDetail() {
         supabase.from('payments').select('*').eq('shipment_id', row.id).order('payment_date', { ascending: false }),
         supabase.storage.from(BUCKET).list(row.id, { limit: 100, sortBy: { column: 'created_at', order: 'desc' } }),
       ]);
-      setUpdates((u.data as ShipmentUpdate[] | null) ?? []);
-      setPayments((p.data as Payment[] | null) ?? []);
-      setDocs(((d.data ?? []) as { name: string; created_at: string | null; metadata: { size?: number } | null }[]).map((f) => ({ name: f.name, created_at: f.created_at, size: f.metadata?.size ?? 0 })));
+      setUpdates((u.data as unknown as ShipmentUpdate[] | null) ?? []);
+      setPayments((p.data as unknown as Payment[] | null) ?? []);
+      setDocs(((d.data ?? []) as unknown as { name: string; created_at: string | null; metadata: { size?: number } | null }[]).map((f) => ({ name: f.name, created_at: f.created_at, size: f.metadata?.size ?? 0 })));
     }
     setLoading(false);
   }, [code]);
@@ -54,7 +54,7 @@ export function ShipmentDetail() {
   useEffect(() => {
     supabase.rpc('list_team_members').then(({ data }) => {
       const map: Record<string, string> = {};
-      for (const m of (data as TeamMember[] | null) ?? []) map[m.id] = m.full_name;
+      for (const m of (data as unknown as TeamMember[] | null) ?? []) map[m.id] = m.full_name;
       setPeople(map);
     });
   }, []);

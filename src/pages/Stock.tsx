@@ -37,7 +37,7 @@ export function Stock() {
     if (scope !== 'ALL') query = query.eq('department', scope);
     const { data, error } = await query;
     if (error) notify.error(error, 'stock');
-    setItems((data as StockItem[] | null) ?? []);
+    setItems((data as unknown as StockItem[] | null) ?? []);
     setLoading(false);
   }, [scope]);
 
@@ -237,7 +237,7 @@ function HistoryModal({ item, onClose }: { item: StockItem | null; onClose: () =
     if (!item) return;
     setRows(null);
     supabase.from('stock_movements').select('*').eq('stock_id', item.id).order('created_at', { ascending: false }).limit(200)
-      .then(({ data }) => setRows((data as StockMovement[] | null) ?? []));
+      .then(({ data }) => setRows((data as unknown as StockMovement[] | null) ?? []));
   }, [item]);
   if (!item) return null;
   return (

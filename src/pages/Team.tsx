@@ -17,7 +17,7 @@ export function Team() {
   const load = useCallback(async () => {
     const { data, error } = await supabase.from('profiles').select('*').order('full_name');
     if (error) notify.error(error);
-    setRows((data as Profile[] | null) ?? []);
+    setRows((data as unknown as Profile[] | null) ?? []);
     setLoading(false);
   }, []);
   useEffect(() => {

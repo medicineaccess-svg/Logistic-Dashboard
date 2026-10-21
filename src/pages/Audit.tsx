@@ -16,7 +16,7 @@ export function Audit() {
   useEffect(() => {
     supabase.from('profiles').select('id,full_name').then(({ data }) => {
       const m: Record<string, string> = {};
-      for (const p of (data as Pick<Profile, 'id' | 'full_name'>[] | null) ?? []) m[p.id] = p.full_name;
+      for (const p of (data as unknown as Pick<Profile, 'id' | 'full_name'>[] | null) ?? []) m[p.id] = p.full_name;
       setNames(m);
     });
   }, []);
@@ -26,7 +26,7 @@ export function Audit() {
     let q = supabase.from('audit_logs').select('*').order('created_at', { ascending: false }).range(page * PAGE, page * PAGE + PAGE - 1);
     if (entity) q = q.eq('entity_type', entity);
     q.then(({ data }) => {
-      setRows((data as AuditLog[] | null) ?? []);
+      setRows((data as unknown as AuditLog[] | null) ?? []);
       setLoading(false);
     });
   }, [entity, page]);

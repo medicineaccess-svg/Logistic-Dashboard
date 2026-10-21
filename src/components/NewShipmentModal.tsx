@@ -79,7 +79,7 @@ export function NewShipmentModal({ open, onClose, onCreated }: { open: boolean; 
     // shipment_code, stage, created_by and timestamps are set by the database trigger.
     const { data, error } = await supabase.from('shipments').insert(v).select('shipment_code').single();
     if (error) return notify.error(error);
-    const code = (data as { shipment_code: string }).shipment_code;
+    const code = (data as unknown as { shipment_code: string }).shipment_code;
     notify.success(`Shipment ${code} created successfully.`);
     reset();
     onCreated(code);

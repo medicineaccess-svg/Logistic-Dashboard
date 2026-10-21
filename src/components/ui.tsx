@@ -33,7 +33,7 @@ export function Card({ children, className, title, action }: { children: ReactNo
   return (
     <section className={cx('rounded-xl border border-line bg-white shadow-soft', className)}>
       {(title || action) && (
-        <header className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3">
+        <header className="flex items-center justify-between gap-3 border-b border-line px-4 py-3">
           <h2 className="text-[15px] font-semibold text-navy-800">{title}</h2>
           {action}
         </header>
@@ -78,8 +78,8 @@ export function Field({ label, error, hint, children, className }: { label: stri
     <label className={cx('block text-sm', className)}>
       <span className="mb-1 block text-[13px] font-medium text-ink">{label}</span>
       {children}
-      {hint && !error && <span className="mt-1 block text-xs text-slate-500">{hint}</span>}
-      {error && <span className="mt-1 block text-xs text-red-600">{error}</span>}
+      {hint && !error && <span className="mt-1 block text-xs text-muted">{hint}</span>}
+      {error && <span className="mt-1 block text-xs text-err">{error}</span>}
     </label>
   );
 }
@@ -106,7 +106,7 @@ export function Modal({ open, onClose, title, children, footer, wide }: { open: 
   }, [open, onClose]);
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-900/40 p-4 sm:p-8" role="dialog" aria-modal="true" aria-label={title}>
+    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-navy-900/30 p-4 backdrop-blur-[2px] sm:p-8" role="dialog" aria-modal="true" aria-label={title}>
       <div className={cx('w-full animate-rise rounded-xl border border-line bg-white shadow-xl', wide ? 'max-w-3xl' : 'max-w-lg')}>
         <div className="flex items-center justify-between border-b border-line px-5 py-3">
           <h3 className="text-base font-semibold text-navy-800">{title}</h3>

@@ -12,7 +12,7 @@ export function SettingsPage() {
 
   useEffect(() => {
     supabase.from('app_settings').select('*').eq('id', 1).single().then(({ data }) => {
-      const v = data as AppSettings | null;
+      const v = data as unknown as AppSettings | null;
       setS(v);
       if (v) {
         setStuck(String(v.stuck_days));
