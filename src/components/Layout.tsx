@@ -22,6 +22,7 @@ import { useAuth } from '../auth/AuthProvider';
 import { DEPT_LABEL, ROLE_LABEL } from '../lib/constants';
 import { useRealtimeStatus } from '../hooks/useRealtime';
 import { BrandLogo, cx } from './ui';
+import { SheetSyncButton } from './SheetSyncButton';
 
 interface NavItem {
   to: string;
@@ -150,6 +151,7 @@ export function Layout({ children }: { children: ReactNode }) {
               {status === 'live' ? 'Live' : status === 'offline' ? 'Offline' : '…'}
             </span>
             <span className="hidden text-xs text-muted xl:inline">{today}</span>
+            <SheetSyncButton />
             <button onClick={() => navigate('/shipments?new=1')} className="inline-flex items-center gap-1 rounded-lg bg-navy-800 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-navy-600">
               <Plus className="h-4 w-4" /> <span className="hidden sm:inline">New shipment</span>
             </button>

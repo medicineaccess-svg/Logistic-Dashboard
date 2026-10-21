@@ -74,3 +74,12 @@ Rules (see `scripts/migrate_sheets.py`): latest dated column wins over "Overall 
 ## Google Sheets mirror
 
 Supabase is the source of truth. A Claude scheduled task (08:41 and 17:41 IST daily) copies shipments into the tab **CT Export (Supabase)** of each department's own sheet (NPP rows → NPP UPDATE sheet, Recordati rows → Recordati sheet). It is one-way: edits made in the sheet are not read back.
+
+## Google Sheet ⇄ dashboard sync
+
+Each team sheet (NPP → `NPM` tab, Recordati → `TOT Sheet` tab) runs a small Apps Script
+([docs/google-apps-script](docs/google-apps-script/SETUP.md)) that sends edited rows to the
+`sheet-sync` Supabase Edge Function within seconds, runs a full sync every 10 minutes, and keeps
+`CT Shipment ID / CT Stage (dashboard) / CT Last update` columns plus a read-only
+`CT Export (Supabase)` tab up to date. The **Sync sheet** button in the dashboard header triggers a
+full sync on demand. The sheet can only move a shipment forward; backward changes are flagged for review.
