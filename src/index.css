@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Ikris Pharma Network design tokens (RGB triplets) */
+:root {
+  --canvas: 247 248 250;   /* #F7F8FA soft ivory */
+  --navy: 25 49 83;        /* #193153 deep navy */
+  --navy-900: 18 36 62;
+  --blue: 66 107 154;      /* #426B9A refined blue */
+  --blue-700: 52 86 126;
+  --blue-100: 213 226 240;
+  --pale-blue: 234 241 248;/* #EAF1F8 */
+  --sage: 123 154 139;     /* #7B9A8B */
+  --pale-sage: 237 244 239;/* #EDF4EF */
+  --ink: 37 52 73;         /* #253449 */
+  --muted: 117 129 149;    /* #758195 */
+  --line: 228 233 240;     /* #E4E9F0 */
+  --mist: 250 251 253;     /* #FAFBFD */
+  --ok: 67 134 107;        /* #43866B */
+  --warn: 185 135 61;      /* #B9873D */
+  --err: 185 94 101;       /* #B95E65 */
+  --info: 84 126 167;      /* #547EA7 */
+}
+
+html { -webkit-font-smoothing: antialiased; }
+body { @apply bg-canvas text-ink; font-feature-settings: 'cv11', 'ss01'; }
+.tnum { font-variant-numeric: tabular-nums; }
+table.data { @apply w-full text-left text-[13px]; }
+table.data th { @apply sticky top-0 whitespace-nowrap border-b border-line bg-mist px-3 py-2.5 text-xs font-medium text-muted; }
+table.data td { @apply border-b border-line/70 px-3 py-2.5 align-top; }
+table.data tbody tr { @apply transition-colors duration-150; }
+table.data tbody tr:hover { @apply bg-navy-50/50; }
+
+/* Toasts in brand style */
+.Toastify__toast { font-family: inherit; font-size: 0.8125rem; color: rgb(var(--ink)); background: #fff; border: 1px solid rgb(var(--line)); box-shadow: 0 4px 16px rgba(25,49,83,0.08); border-radius: 10px; }
+.Toastify__toast--success .Toastify__toast-icon svg { fill: rgb(var(--ok)); }
+.Toastify__toast--error .Toastify__toast-icon svg { fill: rgb(var(--err)); }
+.Toastify__toast--info .Toastify__toast-icon svg { fill: rgb(var(--info)); }
+.Toastify__progress-bar--success { background: rgb(var(--ok)); }
+.Toastify__progress-bar--error { background: rgb(var(--err)); }
+.Toastify__progress-bar--info { background: rgb(var(--info)); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}
