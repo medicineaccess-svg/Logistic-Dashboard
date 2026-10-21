@@ -32,14 +32,17 @@ table.data td { @apply border-b border-line/70 px-3 py-2.5 align-top; }
 table.data tbody tr { @apply transition-colors duration-150; }
 table.data tbody tr:hover { @apply bg-navy-50/50; }
 
-/* Toasts in brand style */
-.Toastify__toast { font-family: inherit; font-size: 0.8125rem; color: rgb(var(--ink)); background: #fff; border: 1px solid rgb(var(--line)); box-shadow: 0 4px 16px rgba(25,49,83,0.08); border-radius: 10px; }
-.Toastify__toast--success .Toastify__toast-icon svg { fill: rgb(var(--ok)); }
-.Toastify__toast--error .Toastify__toast-icon svg { fill: rgb(var(--err)); }
-.Toastify__toast--info .Toastify__toast-icon svg { fill: rgb(var(--info)); }
-.Toastify__progress-bar--success { background: rgb(var(--ok)); }
-.Toastify__progress-bar--error { background: rgb(var(--err)); }
-.Toastify__progress-bar--info { background: rgb(var(--info)); }
+/* Toasts: solid colour, white text (success = green, error = red) */
+.Toastify__toast { font-family: inherit; font-size: 0.8125rem; font-weight: 500; color: #fff !important; background: rgb(var(--navy)); border: 0; box-shadow: 0 6px 20px rgba(18,36,62,0.18); border-radius: 10px; }
+.Toastify__toast--success { background: #2E7D4F !important; color: #fff; }
+.Toastify__toast--error { background: #C62828 !important; color: #fff; }
+.Toastify__toast--info, .Toastify__toast--default { background: rgb(var(--navy)) !important; color: #fff; }
+.Toastify__toast--warning { background: #B9873D !important; color: #fff; }
+.Toastify__toast-icon svg { fill: #fff !important; }
+.Toastify__toast .Toastify__spinner { border-color: rgba(255,255,255,0.35); border-right-color: #fff; }
+.Toastify__close-button { color: #fff; opacity: 0.85; }
+.Toastify__close-button:hover { opacity: 1; }
+.Toastify__progress-bar { background: rgba(255,255,255,0.6) !important; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
