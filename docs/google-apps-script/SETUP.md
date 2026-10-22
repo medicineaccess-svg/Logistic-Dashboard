@@ -25,6 +25,7 @@ account that owns the sheets.
 | Every 10 minutes | Full sync of the tab, plus refresh of the **CT Export (Supabase)** tab. |
 | Someone clicks **Sync sheet** in the dashboard | Full sync on demand. |
 | Dashboard update (stage, payment, hold…) | Shown in the sheet's **CT Stage (dashboard)** / **CT Last update** columns and the CT Export tab at the next sync. |
+| Someone picks a stage in the **CT Stage (dashboard)** dropdown | The dashboard is set to exactly that stage (forward or back) within seconds. |
 
 Three columns are added at the right end of the tab: **CT Shipment ID**, **CT Stage (dashboard)**, **CT Last update**.
 Please don't edit or delete them; the shipment ID is what keeps each sheet row tied to the same shipment
@@ -32,10 +33,14 @@ even if rows are sorted, inserted or deleted. New date columns (e.g. `22/10/26`)
 
 ### Rules the sync follows
 - Columns are found by **header name**, so adding, moving or deleting other columns is safe.
-- Newest dated status column wins; "Delivered" anywhere wins; Payment status **Received** moves an
-  Inquiry to **Payment received**.
-- The sheet can move a shipment **forward** only. If the sheet implies an earlier stage than the
-  dashboard, the shipment is flagged **Needs review** instead of being moved back.
+- **Payment status** is copied exactly: "Received" shows as Received, "Not Received" / "Pending" shows as Unpaid.
+  If a shipment is at Payment received only because of payment and the sheet changes to Not Received, it goes back to Inquiry.
+- **Payment received date** comes only from the sheet's own date column — no date is invented.
+- The stage is read from the newest dated status column (e.g. `21/10/26`); "Delivered" anywhere wins.
+  Free text can only move a shipment **forward**. If the newest text points to an earlier stage, the shipment
+  is flagged **Needs review** (with the sheet text) instead of being guessed.
+- To set a stage exactly — forward or back — pick it in the **CT Stage (dashboard)** dropdown.
+- A milestone date is filled only from the sheet (the dated column it was read from, or the delivery date).
 - A new row with a patient name creates a new shipment (NPM-xxxx / RDM-xxxx).
 
 ### Re-deploying after a script change

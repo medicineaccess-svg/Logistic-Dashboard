@@ -9,6 +9,7 @@
  *  - Every 10 minutes a full sync runs (catches pasted rows, imports, edits by other scripts).
  *  - "Sync with Google Sheet" in the dashboard calls this script's web app to run a sync on demand.
  *  - Three columns are kept at the end of the team tab: CT Shipment ID, CT Stage (dashboard), CT Last update.
+ *    "CT Stage (dashboard)" is a dropdown: picking a stage there sets exactly that stage in the dashboard.
  *  - The "CT Export (Supabase)" tab is refreshed with the full dashboard data (stage, payments, alerts...).
  *
  * No Google credentials are stored in Supabase. The only secret is the shared SYNC secret,
@@ -22,6 +23,8 @@ const SHEETS = {
 };
 const MIRROR_TAB = 'CT Export (Supabase)';
 const CT_HEADERS = ['CT Shipment ID', 'CT Stage (dashboard)', 'CT Last update'];
+const STAGES = ['Inquiry', 'Payment received', 'Import permit', 'CDEC form signed', 'CDEC approved', 'Order placed',
+  'Shipped', 'In customs', 'Cleared', 'Delivered', 'POD received'];
 const HEADER_ROW = 1;
 
 /* ---------------- menu & one-time setup ---------------- */
@@ -102,7 +105,12 @@ function onEditSync(e) {
     const headers = ensureCtColumns_(sh);
     const values = sh.getRange(first, 1, last - first + 1, headers.length).getDisplayValues();
     const rows = values.map((v, i) => ({ row: first + i, values: v }));
-    const res = callEdge_({ action: 'push', department: ctx.conf.dept, trigger: 'sheet_edit', headers: headers, rows: rows });
+    // Did the person edit the CT Stage dropdown? Then that exact stage is applied.
+    const stageCol = headers.findIndex((x) => String(x).trim().toLowerCase() === CT_HEADERS[1].toLowerCase()) + 1;
+    const c1 = e.range.getColumn();
+    const c2 = e.range.getLastColumn();
+    const stageRows = stageCol > 0 && stageCol >= c1 && stageCol <= c2 ? rows.map((r) => r.row) : [];
+    const res = callEdge_({ action: 'push', department: ctx.conf.dept, trigger: 'sheet_edit', headers: headers, rows: rows, stage_rows: stageRows });
     if (res.ok) writeCt_(sh, headers, res.results);
   } finally {
     lock.releaseLock();
@@ -168,6 +176,7 @@ function refreshMirror_() {
 
 /** Make sure the 3 CT columns exist at the end of the team tab; returns the header row. */
 function ensureCtColumns_(sh) {
+  ensureStageDropdown_(sh);
   let lastCol = sh.getLastColumn();
   let headers = sh.getRange(HEADER_ROW, 1, 1, lastCol).getDisplayValues()[0];
   const norm = (h) => String(h).trim().toLowerCase();
@@ -179,12 +188,36 @@ function ensureCtColumns_(sh) {
     headers = sh.getRange(HEADER_ROW, 1, 1, lastCol).getDisplayValues()[0];
     try {
       const idCol = headers.findIndex((x) => norm(x) === norm(CT_HEADERS[0])) + 1;
-      sh.getRange(1, idCol, sh.getMaxRows(), 3).protect().setDescription('Control Tower columns').setWarningOnly(true);
+      sh.getRange(1, idCol, sh.getMaxRows(), 1).protect().setDescription('Control Tower ID column').setWarningOnly(true);
     } catch (e) {
       /* protection is optional */
     }
   }
   return headers;
+}
+
+/** CT Stage column = dropdown of the 11 stages (added once). */
+function ensureStageDropdown_(sh) {
+  const props = PropertiesService.getScriptProperties();
+  if (props.getProperty('DROPDOWN_V1') === sh.getSheetId() + '') return;
+  const lastCol = sh.getLastColumn();
+  const headers = sh.getRange(HEADER_ROW, 1, 1, lastCol).getDisplayValues()[0];
+  const col = headers.findIndex((x) => String(x).trim().toLowerCase() === CT_HEADERS[1].toLowerCase()) + 1;
+  if (col <= 0) return;
+  const rule = SpreadsheetApp.newDataValidation().requireValueInList(STAGES, true).setAllowInvalid(false)
+    .setHelpText('Pick the correct stage. The dashboard will be set to exactly this stage.').build();
+  sh.getRange(HEADER_ROW + 1, col, Math.max(sh.getMaxRows() - HEADER_ROW, 1), 1).setDataValidation(rule);
+  // Keep only the Shipment ID column protected, so the stage dropdown can be used without a warning.
+  sh.getProtections(SpreadsheetApp.ProtectionType.RANGE).forEach((p) => {
+    if (p.getDescription() === 'Control Tower columns') p.remove();
+  });
+  try {
+    sh.getRange(1, col - 1, sh.getMaxRows(), 1).protect().setDescription('Control Tower ID column').setWarningOnly(true);
+  } catch (err) {
+    /* optional */
+  }
+  sh.getRange(HEADER_ROW, col).setNote('Dropdown: pick a stage here to set it in the dashboard (forward or back).');
+  props.setProperty('DROPDOWN_V1', sh.getSheetId() + '');
 }
 
 function writeCt_(sh, headers, results) {

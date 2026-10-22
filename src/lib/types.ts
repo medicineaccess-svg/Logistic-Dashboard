@@ -81,6 +81,7 @@ export interface ShipmentOverview extends Shipment {
   last_payment_date: string | null;
   other_currency_payments: number;
   payment_status: PaymentStatus;
+  sheet_payment_status?: string | null;
   outstanding_amount: number | null;
   days_since_update: number;
   days_in_stage: number;

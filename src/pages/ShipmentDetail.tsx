@@ -204,6 +204,7 @@ export function ShipmentDetail() {
           <Card title="Payment">
             <div className="space-y-1 p-4 text-sm">
               <Row label="Status"><PaymentBadge status={s.payment_status} /></Row>
+              {s.sheet_payment_status && <Row label="Google Sheet says">{s.sheet_payment_status}</Row>}
               <Row label="PI">{s.pi_number ?? '—'} · {fmtMoney(s.pi_amount, s.currency)}</Row>
               <Row label="Received">{fmtMoney(s.received_total, s.currency)}</Row>
               <Row label="Outstanding">{s.outstanding_amount != null ? fmtMoney(s.outstanding_amount, s.currency) : '—'}</Row>

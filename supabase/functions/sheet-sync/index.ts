@@ -115,6 +115,8 @@ async function push(body: {
   triggered_by?: string;
   headers: string[];
   rows: { row: number; values: unknown[] }[];
+  /** rows where a person edited the CT Stage cell (dropdown) — that value is applied exactly */
+  stage_rows?: number[];
 }) {
   const dept = body.department;
   if (dept !== 'NPP' && dept !== 'RARE_DISEASE') return json({ error: 'bad department' }, 400);
@@ -134,7 +136,8 @@ async function push(body: {
   const runId = (run as { id: number } | null)?.id;
 
   const cols = new Columns(body.headers.map((h) => String(h ?? '')));
-  const [ctIdCol] = cols.ctIndexes();
+  const [ctIdCol, ctStageCol] = cols.ctIndexes();
+  const stageRows = new Set((body.stage_rows ?? []).filter((n) => Number.isInteger(n)));
   const tabPrefix = dept === 'NPP' ? 'NPP:NPM:' : 'TOT:';
 
   const { data: existing, error: exErr } = await admin.from('shipments').select('*').eq('department', dept).limit(10000);
@@ -207,6 +210,7 @@ async function push(body: {
         sheet_hash: hash,
         sheet_row: r.row,
         sheet_synced_at: now,
+        sheet_payment_status: rec.sheet_payment_status,
       };
       for (const f of FIELDS) if (f !== 'medicine_name' && rec[f] != null) insert[f] = rec[f];
       for (const f of ['payment_received_date', 'import_permit_date', 'order_placed_date', 'delivery_date'] as const) if (rec[f]) insert[f] = rec[f];
@@ -235,7 +239,10 @@ async function push(body: {
 
     claimed.add(ship.shipment_code);
     seenSignatures.set(hash, ship.shipment_code);
-    if (ship.sheet_hash === hash || ship.archived_at) {
+    // A person picked a stage in the sheet's CT Stage dropdown: apply exactly that stage (forward or back).
+    const picked = stageRows.has(r.row) && ctStageCol >= 0 ? String(values[ctStageCol] ?? '').trim() : '';
+    const explicit = (STAGES as readonly string[]).includes(picked) && picked !== ship.current_stage ? (picked as Stage) : null;
+    if ((ship.sheet_hash === hash && !explicit) || ship.archived_at) {
       stats.unchanged++;
       if (ship.sheet_row !== r.row) await admin.from('shipments').update({ sheet_row: r.row }).eq('id', ship.id);
       results.push({ row: r.row, code: ship.shipment_code, stage: ship.current_stage, updated: istStamp(ship.last_activity_at) });
@@ -252,7 +259,16 @@ async function push(body: {
         meaningful = true;
       }
     }
-    if (rec.payment_received_date && !ship.payment_received_date) patch.payment_received_date = rec.payment_received_date;
+    // Payment: the sheet's Payment status / Payment received date cells are copied exactly.
+    if ((rec.sheet_payment_status ?? null) !== ((ship.sheet_payment_status as string | null) ?? null)) {
+      patch.sheet_payment_status = rec.sheet_payment_status;
+      meaningful = true;
+    }
+    if (rec.payment_not_received) {
+      if (ship.payment_received_date) patch.payment_received_date = null;
+    } else if (rec.payment_received_date && rec.payment_received_date !== ship.payment_received_date) {
+      patch.payment_received_date = rec.payment_received_date;
+    }
     if (rec.import_permit_date && !ship.import_permit_date) patch.import_permit_date = rec.import_permit_date;
     if (rec.order_placed_date && !ship.order_placed_date) patch.order_placed_date = rec.order_placed_date;
     if (rec.gst_pending) patch.gst_status = 'Pending';
@@ -264,17 +280,34 @@ async function push(body: {
     const statusChanged = textDiffers && !(firstLink && rec.stage === ship.current_stage);
     const from = ship.current_stage;
     let to: Stage = from;
-    if (rec.stage !== from) {
+    let backward = false;
+    // Only the milestone of the stage actually reached gets a date, taken from the sheet
+    // (delivery date cell, or the date header of the column the status was read from). No invented dates.
+    const setMilestone = (st: Stage) => {
+      const col = MILESTONE[st];
+      if (!col || col === 'payment_received_date' || ship![col]) return;
+      const d = st === 'Delivered' ? rec.delivery_date ?? rec.last_dated : rec.last_dated;
+      if (d) patch[col] = d;
+    };
+    if (explicit) {
+      to = explicit;
+      backward = stageIndex(to) < stageIndex(from);
+      patch.current_stage = to;
+      patch.stage_entered_at = now;
+      patch.needs_review = false;
+      patch.review_note = null;
+    } else if (rec.payment_not_received && from === 'Payment received' && rec.stage === 'Inquiry') {
+      // The only reason it was at Payment received was the payment; the sheet now says Not Received.
+      to = 'Inquiry';
+      backward = true;
+      patch.current_stage = to;
+      patch.stage_entered_at = now;
+    } else if (rec.stage !== from) {
       if (stageIndex(rec.stage) > stageIndex(from)) {
         to = rec.stage;
         patch.current_stage = to;
         patch.stage_entered_at = now;
-        // fill milestone dates for every stage passed
-        for (let i = stageIndex(from) + 1; i <= stageIndex(to); i++) {
-          const col = MILESTONE[STAGES[i]];
-          if (col === 'payment_received_date' && rec.payment_not_received) continue;
-          if (col && !ship[col]) patch[col] = i === stageIndex(to) && to === 'Delivered' && rec.delivery_date ? rec.delivery_date : now.slice(0, 10);
-        }
+        setMilestone(to);
         patch.needs_review = !rec.confident;
         patch.review_note = rec.confident ? null : rec.review_note;
       } else if (statusChanged) {
@@ -293,14 +326,20 @@ async function push(body: {
       continue;
     }
     if (to !== from || statusChanged) {
+      const why = explicit
+        ? `Stage set to ${to} in Google Sheet (row ${r.row})`
+        : backward
+          ? `Google Sheet payment status is '${rec.sheet_payment_status ?? ''}' (row ${r.row})`
+          : `Updated from Google Sheet (row ${r.row})${rec.status_text ? `: ${rec.status_text}` : ''}`;
       await admin.from('shipment_updates').insert({
         shipment_id: ship.id,
         previous_stage: from,
         new_stage: to,
-        update_type: 'sheet_sync',
-        update_message: `Updated from Google Sheet (row ${r.row})${rec.status_text ? `: ${rec.status_text}` : ''}`,
+        update_type: backward ? 'stage_correction' : 'sheet_sync',
+        update_message: why,
+        correction_reason: backward ? why : null,
         source: 'google_sheet',
-        metadata: { row: r.row, trigger },
+        metadata: { row: r.row, trigger, explicit: !!explicit },
       });
     }
     stats.updated++;

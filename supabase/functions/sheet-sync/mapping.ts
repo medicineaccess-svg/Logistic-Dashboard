@@ -39,6 +39,8 @@ export interface SheetRecord {
   payment_received_date: string | null;
   /** the sheet explicitly says payment is NOT received (e.g. "Not Received", "Pending") */
   payment_not_received: boolean;
+  /** exact text of the sheet's Payment status cell */
+  sheet_payment_status: string | null;
   import_permit_date: string | null;
   order_placed_date: string | null;
   delivery_date: string | null;
@@ -49,6 +51,8 @@ export interface SheetRecord {
   status_text: string | null;
   review_note: string | null;
   last_dated: string | null;
+  /** true when the stage came from an explicit column (payment/milestone columns), not free text */
+  stage_from_text: boolean;
 }
 
 const clean = (v: unknown) => String(v ?? '').replace(/\s+/g, ' ').trim();
@@ -243,8 +247,9 @@ export function nppRecord(cols: Columns, v: unknown[]): SheetRecord {
     cha_name: g('cha name') || null,
     awb_number: g('awb number', 'awb') || null,
     payment_account: g('payment received indian a/c/ hkg a/c', 'payment received indian') || null,
-    payment_received_date: paymentReceived ? parseDate(payDateText) ?? latest?.date ?? null : null,
+    payment_received_date: paymentReceived ? parseDate(payDateText) : null,
     payment_not_received: paymentNotReceived,
+    sheet_payment_status: payStatus || null,
     import_permit_date: /^yes/i.test(g('import license')) ? null : parseDate(g('import license')),
     order_placed_date: null,
     delivery_date: stage === 'Delivered' ? parseDate(deliveryStatus) ?? parseDate(overall) : null,
@@ -255,6 +260,7 @@ export function nppRecord(cols: Columns, v: unknown[]): SheetRecord {
     status_text: statusText ? statusText.slice(0, 500) : null,
     review_note: notes.length ? notes.join('; ') : null,
     last_dated: latest?.date ?? null,
+    stage_from_text: true,
   };
 }
 
@@ -306,8 +312,9 @@ export function totRecord(cols: Columns, v: unknown[]): SheetRecord {
     cha_name: null,
     awb_number: g('awb number', 'awb') || null,
     payment_account: pay === 'institutional order' ? 'Institutional order' : null,
-    payment_received_date: cands.includes('Payment received') ? orderDate : null,
+    payment_received_date: null, // the TOT sheet has no payment date column — don't invent one
     payment_not_received: ['pending', 'not received', 'awaited'].includes(pay),
+    sheet_payment_status: g('payment status') || null,
     import_permit_date: null,
     order_placed_date: orderDate,
     delivery_date: stage === 'Delivered' ? parseDate(g('end date')) : null,
@@ -317,6 +324,7 @@ export function totRecord(cols: Columns, v: unknown[]): SheetRecord {
     confident: true,
     status_text: [bits.join('; '), remarks].filter(Boolean).join(' — ').slice(0, 500) || null,
     review_note: notes.length ? notes.join('; ') : null,
-    last_dated: orderDate,
+    last_dated: null, // TOT has no per-stage dates
+    stage_from_text: false,
   };
 }
