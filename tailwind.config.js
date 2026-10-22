@@ -13,6 +13,8 @@ export default {
         line: v('line'),
         mist: v('mist'),
         canvas: v('canvas'),
+        aubergine: v('aubergine'),
+        marigold: v('marigold'),
         ok: v('ok'),
         warn: v('warn'),
         err: v('err'),

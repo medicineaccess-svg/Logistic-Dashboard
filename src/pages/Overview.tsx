@@ -9,11 +9,11 @@ import { monthStartISO } from '../lib/format';
 import { Button, Card, DeptBadge, Empty, Kpi, PageHeader, Skeleton, StageBadge } from '../components/ui';
 
 export const CHART = {
-  blue: '#426B9A',
-  navy: '#193153',
+  blue: '#5B2352',
+  navy: '#3A0F34',
   sage: '#7B9A8B',
   pale: '#C9D8EA',
-  amber: '#B9873D',
+  amber: '#EAAA00',
   red: '#B95E65',
   grid: '#E4E9F0',
   text: '#758195',

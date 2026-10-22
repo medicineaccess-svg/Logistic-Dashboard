@@ -65,7 +65,7 @@ export function Login() {
           </Field>
         )}
         {error && <p className="rounded-lg bg-err/10 px-3 py-2 text-sm text-err" role="alert">{error}</p>}
-        <Button type="submit" variant="primary" className="w-full !bg-navy-600 py-2 hover:!bg-navy-700" loading={busy}>
+        <Button type="submit" variant="primary" className="w-full py-2" loading={busy}>
           {mode === 'login' ? 'Sign in' : 'Send reset link'}
         </Button>
         <div className="text-center">

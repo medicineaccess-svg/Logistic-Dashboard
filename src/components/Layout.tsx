@@ -77,7 +77,7 @@ export function Layout({ children }: { children: ReactNode }) {
             aria-current={here === i.to ? 'page' : undefined}
             className={cx(
               'flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] transition-colors duration-150',
-              here === i.to ? 'bg-white/15 font-semibold text-white shadow-[inset_3px_0_0_#fff]' : 'text-white/85 hover:bg-white/10 hover:text-white',
+              here === i.to ? 'bg-marigold font-semibold text-aubergine' : 'text-white/85 hover:bg-white/10 hover:text-marigold',
             )}
           >
             <i.icon className="h-4 w-4 shrink-0" aria-hidden />
@@ -92,7 +92,7 @@ export function Layout({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen">
       {/* Sidebar */}
-      <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col bg-navy-900 text-white lg:flex">
+      <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col bg-aubergine text-white lg:flex">
         <Brand />
         {nav}
         <SidebarFooter />
@@ -100,7 +100,7 @@ export function Layout({ children }: { children: ReactNode }) {
       {open && (
         <div className="fixed inset-0 z-40 lg:hidden">
           <div className="absolute inset-0 bg-navy-900/30" onClick={() => setOpen(false)} />
-          <aside className="absolute inset-y-0 left-0 flex w-64 animate-rise flex-col bg-navy-900 text-white">
+          <aside className="absolute inset-y-0 left-0 flex w-64 animate-rise flex-col bg-aubergine text-white">
             <div className="flex items-center justify-between pr-3">
               <Brand />
               <button onClick={() => setOpen(false)} className="rounded p-1 text-white/80 hover:text-white" aria-label="Close menu">
@@ -114,7 +114,7 @@ export function Layout({ children }: { children: ReactNode }) {
       )}
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-line bg-white/90 px-4 backdrop-blur">
+        <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b-2 border-marigold bg-white/95 px-4 backdrop-blur">
           <button className="rounded p-1.5 text-muted hover:bg-canvas lg:hidden" onClick={() => setOpen(true)} aria-label="Open menu">
             <Menu className="h-5 w-5" />
           </button>
@@ -152,7 +152,7 @@ export function Layout({ children }: { children: ReactNode }) {
             </span>
             <span className="hidden text-xs text-muted xl:inline">{today}</span>
             <SheetSyncButton />
-            <button onClick={() => navigate('/shipments?new=1')} className="inline-flex items-center gap-1 rounded-lg bg-navy-800 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-navy-600">
+            <button onClick={() => navigate('/shipments?new=1')} className="inline-flex items-center gap-1 rounded-lg bg-marigold px-3 py-1.5 text-sm font-semibold text-aubergine transition hover:brightness-95">
               <Plus className="h-4 w-4" /> <span className="hidden sm:inline">New shipment</span>
             </button>
             <div className="hidden text-right leading-tight md:block">
@@ -184,8 +184,8 @@ function SidebarFooter() {
   const { profile } = useAuth();
   if (!profile) return null;
   return (
-    <div className="flex items-center gap-2.5 border-t border-white/15 px-4 py-3">
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-xs font-semibold text-navy-900">
+    <div className="flex items-center gap-2.5 border-t border-marigold/40 px-4 py-3">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-marigold text-xs font-semibold text-aubergine">
         {profile.full_name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase()}
       </div>
       <div className="min-w-0 leading-tight">

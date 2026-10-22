@@ -4,9 +4,11 @@
 
 /* Ikris Pharma Network design tokens (RGB triplets) */
 :root {
-  --canvas: 247 248 250;   /* #F7F8FA soft ivory */
-  --navy: 25 49 83;        /* #193153 deep navy */
-  --navy-900: 18 36 62;
+  --canvas: 221 227 232;   /* #DDE3E8 ice silver */
+  --navy: 58 15 52;        /* #3A0F34 deep aubergine (primary) */
+  --navy-900: 42 10 37;
+  --aubergine: 58 15 52;   /* #3A0F34 sidebar */
+  --marigold: 234 170 0;   /* #EAAA00 accent */
   --blue: 66 107 154;      /* #426B9A refined blue */
   --blue-700: 52 86 126;
   --blue-100: 213 226 240;
@@ -33,7 +35,7 @@ table.data tbody tr { @apply transition-colors duration-150; }
 table.data tbody tr:hover { @apply bg-navy-50/50; }
 
 /* Toasts: solid colour, white text (success = green, error = red) */
-.Toastify__toast { font-family: inherit; font-size: 0.8125rem; font-weight: 500; color: #fff !important; background: rgb(var(--navy)); border: 0; box-shadow: 0 6px 20px rgba(18,36,62,0.18); border-radius: 10px; }
+.Toastify__toast { font-family: inherit; font-size: 0.8125rem; font-weight: 500; color: #fff !important; background: rgb(var(--navy)); border: 0; box-shadow: 0 6px 20px rgba(58,15,52,0.22); border-radius: 10px; }
 .Toastify__toast--success { background: #2E7D4F !important; color: #fff; }
 .Toastify__toast--error { background: #C62828 !important; color: #fff; }
 .Toastify__toast--info, .Toastify__toast--default { background: rgb(var(--navy)) !important; color: #fff; }

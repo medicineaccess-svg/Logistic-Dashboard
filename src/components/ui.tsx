@@ -52,7 +52,7 @@ export function Button({
   ...rest
 }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: BtnVariant; loading?: boolean }) {
   const styles: Record<BtnVariant, string> = {
-    primary: 'bg-navy-800 text-white hover:bg-navy-600 border-navy-800',
+    primary: 'bg-marigold text-aubergine font-semibold hover:brightness-95 border-marigold',
     secondary: 'bg-white text-ink hover:bg-canvas border-line',
     ghost: 'bg-transparent text-muted hover:bg-canvas border-transparent',
     danger: 'bg-white text-err hover:bg-err/5 border-err/40',

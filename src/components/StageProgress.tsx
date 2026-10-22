@@ -17,7 +17,7 @@ export function StageProgress({ stage }: { stage: Stage }) {
                 className={cx(
                   'flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 text-[10px] font-semibold transition-all duration-300',
                   done && 'border-ok bg-ok text-white',
-                  active && !done && 'border-navy-800 bg-navy-800 text-white ring-4 ring-navy-50',
+                  active && !done && 'border-marigold bg-marigold text-aubergine ring-4 ring-marigold/25',
                   !done && !active && 'border-line bg-white text-muted/70',
                 )}
               >
