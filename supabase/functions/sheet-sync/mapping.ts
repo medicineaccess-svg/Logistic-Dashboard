@@ -37,6 +37,8 @@ export interface SheetRecord {
   awb_number: string | null;
   payment_account: string | null;
   payment_received_date: string | null;
+  /** the sheet explicitly says payment is NOT received (e.g. "Not Received", "Pending") */
+  payment_not_received: boolean;
   import_permit_date: string | null;
   order_placed_date: string | null;
   delivery_date: string | null;
@@ -181,7 +183,10 @@ export function nppRecord(cols: Columns, v: unknown[]): SheetRecord {
   const g = (...n: string[]) => cols.get(v, ...n);
   const payDateText = g('payment received date');
   const payStatus = g('payment status');
-  const paymentReceived = /received/i.test(payStatus) || !!parseDate(payDateText) || /^yes/i.test(payDateText);
+  // "Not Received" contains the word "received" — check the negative first.
+  const ps = norm(payStatus);
+  const paymentNotReceived = /\bnot\b|pending|await|due|no\b/.test(ps);
+  const paymentReceived = !paymentNotReceived && (/rec(ei|ie)ved|^yes|^paid|^done/.test(ps) || !!parseDate(payDateText) || /^(yes|rec(ei|ie)ved)/i.test(payDateText));
   const overall = g('overall status');
   const deliveryStatus = g('delivery status');
   const daily = cols.dateCols.map((d) => ({ date: d.date, text: clean(v[d.col]) })).filter((d) => d.text);
@@ -239,6 +244,7 @@ export function nppRecord(cols: Columns, v: unknown[]): SheetRecord {
     awb_number: g('awb number', 'awb') || null,
     payment_account: g('payment received indian a/c/ hkg a/c', 'payment received indian') || null,
     payment_received_date: paymentReceived ? parseDate(payDateText) ?? latest?.date ?? null : null,
+    payment_not_received: paymentNotReceived,
     import_permit_date: /^yes/i.test(g('import license')) ? null : parseDate(g('import license')),
     order_placed_date: null,
     delivery_date: stage === 'Delivered' ? parseDate(deliveryStatus) ?? parseDate(overall) : null,
@@ -301,6 +307,7 @@ export function totRecord(cols: Columns, v: unknown[]): SheetRecord {
     awb_number: g('awb number', 'awb') || null,
     payment_account: pay === 'institutional order' ? 'Institutional order' : null,
     payment_received_date: cands.includes('Payment received') ? orderDate : null,
+    payment_not_received: ['pending', 'not received', 'awaited'].includes(pay),
     import_permit_date: null,
     order_placed_date: orderDate,
     delivery_date: stage === 'Delivered' ? parseDate(g('end date')) : null,

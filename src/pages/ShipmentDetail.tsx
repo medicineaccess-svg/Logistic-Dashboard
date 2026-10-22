@@ -142,7 +142,7 @@ export function ShipmentDetail() {
               <D label="Courier / CHA">{[s.courier_name, s.cha_name].filter(Boolean).join(' · ') || null}</D>
               <D label="AWB / tracking">{s.awb_number ?? s.tracking_number}</D>
               <D label="Import permit no.">{s.import_permit_number}</D>
-              <D label="Source">{s.source === 'sheet_import' ? `Legacy sheet (${s.source_ref})` : 'Created in app'}</D>
+              <D label="Source">{s.source === 'sheet_import' ? `Legacy sheet (${s.source_ref})` : s.source === 'sheet_sync' ? `Google Sheet (${s.source_ref})` : 'Created in app'}</D>
               <D label="Notes" wide>{s.notes}</D>
             </dl>
           </Card>
@@ -167,7 +167,7 @@ export function ShipmentDetail() {
                       {u.update_message && <p className="mt-0.5 whitespace-pre-wrap break-words text-[13px] text-ink">{u.update_message}</p>}
                       {u.correction_reason && <p className="mt-0.5 text-[13px] text-warn">Correction reason: {u.correction_reason}</p>}
                       <p className="tnum mt-0.5 text-xs text-muted">
-                        {fmtDateTime(u.updated_at)} · {u.updated_by ? people[u.updated_by] ?? 'Team member' : u.source === 'sheet_import' ? 'Sheet import' : 'System'}
+                        {fmtDateTime(u.updated_at)} · {u.updated_by ? people[u.updated_by] ?? 'Team member' : u.source === 'sheet_import' ? 'Sheet import' : u.source === 'google_sheet' ? 'Google Sheet sync' : 'System'}
                       </p>
                     </div>
                   </li>

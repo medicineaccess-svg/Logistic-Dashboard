@@ -272,6 +272,7 @@ async function push(body: {
         // fill milestone dates for every stage passed
         for (let i = stageIndex(from) + 1; i <= stageIndex(to); i++) {
           const col = MILESTONE[STAGES[i]];
+          if (col === 'payment_received_date' && rec.payment_not_received) continue;
           if (col && !ship[col]) patch[col] = i === stageIndex(to) && to === 'Delivered' && rec.delivery_date ? rec.delivery_date : now.slice(0, 10);
         }
         patch.needs_review = !rec.confident;
