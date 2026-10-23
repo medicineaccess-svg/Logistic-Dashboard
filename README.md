@@ -73,7 +73,7 @@ Rules (see `scripts/migrate_sheets.py`): latest dated column wins over "Overall 
 
 ## Google Sheets mirror
 
-Supabase is the source of truth. A Claude scheduled task (08:41 and 17:41 IST daily) copies shipments into the tab **CT Export (Supabase)** of each department's own sheet (NPP rows → NPP UPDATE sheet, Recordati rows → Recordati sheet). It is one-way: edits made in the sheet are not read back.
+Supabase is the source of truth for the dashboard. The Apps Script in each sheet (see *Google Sheet ⇄ dashboard sync*) refreshes the tab **CT Export (Supabase)** every 10 minutes: NPP rows → NPP UPDATE sheet, Recordati rows → Recordati All India Data sheet (`10QDCb9yB804afJAxOMvKtWFPNHU7AGwsSLew6vs7lpE`). The earlier Claude scheduled mirror task is switched off.
 
 ## Google Sheet ⇄ dashboard sync
 

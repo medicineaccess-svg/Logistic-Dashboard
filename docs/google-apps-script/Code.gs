@@ -19,7 +19,7 @@
 const EDGE_URL = 'https://mmqesztrrwmmqiuadvyi.supabase.co/functions/v1/sheet-sync';
 const SHEETS = {
   '1bXcW_7zLdfid1vYet5V2WHsfEuTpi4Y8DFgm_Pgt55c': { dept: 'NPP', tab: 'NPM' },
-  '19dPu0vjZ8KMtMUaeZq_DzztqIxDt_4xDxvbmgZUxw8I': { dept: 'RARE_DISEASE', tab: 'TOT Sheet' },
+  '10QDCb9yB804afJAxOMvKtWFPNHU7AGwsSLew6vs7lpE': { dept: 'RARE_DISEASE', tab: 'TOT Sheet' }, // Recordati All India Data
 };
 const MIRROR_TAB = 'CT Export (Supabase)';
 const CT_HEADERS = ['CT Shipment ID', 'CT Stage (dashboard)', 'CT Last update'];
