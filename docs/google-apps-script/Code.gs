@@ -22,6 +22,7 @@ const SHEETS = {
   '10QDCb9yB804afJAxOMvKtWFPNHU7AGwsSLew6vs7lpE': { dept: 'RARE_DISEASE', tab: 'TOT Sheet' }, // Recordati All India Data
 };
 const MIRROR_TAB = 'CT Export (Supabase)';
+const SALES_TABS = ['Monthy Sales Data', 'Monthly Sales Data']; // Recordati sheet only
 const CT_HEADERS = ['CT Shipment ID', 'CT Stage (dashboard)', 'CT Last update'];
 const STAGES = ['Inquiry', 'Payment received', 'Import permit', 'CDEC form signed', 'CDEC approved', 'Order placed',
   'Shipped', 'In customs', 'Cleared', 'Delivered', 'POD received'];
@@ -95,6 +96,16 @@ function onEditSync(e) {
   const ctx = ctx_();
   if (!ctx) return;
   const sh = e.range.getSheet();
+  if (ctx.conf.dept === 'RARE_DISEASE' && SALES_TABS.indexOf(sh.getName()) >= 0) {
+    const l = LockService.getScriptLock();
+    if (!l.tryLock(20000)) return;
+    try {
+      pushSales_(ctx);
+    } finally {
+      l.releaseLock();
+    }
+    return;
+  }
   if (sh.getName() !== ctx.conf.tab) return;
   const first = Math.max(e.range.getRow(), HEADER_ROW + 1);
   const last = e.range.getLastRow();
@@ -150,12 +161,26 @@ function fullSync_(trigger, by) {
     if (!res.ok) return res;
     writeCt_(sh, headers, res.results);
     const m = refreshMirror_();
-    return { ok: true, stats: res.stats, mirror: m.ok ? m.count : 0 };
+    const sales = ctx.conf.dept === 'RARE_DISEASE' ? pushSales_(ctx) : null;
+    return { ok: true, stats: res.stats, mirror: m.ok ? m.count : 0, sales: sales && sales.ok ? sales.saved : undefined };
   } catch (err) {
     return { ok: false, error: String(err && err.message ? err.message : err) };
   } finally {
     lock.releaseLock();
   }
+}
+
+/** Recordati: send the whole "Monthy Sales Data" tab (the dashboard keeps an exact copy). */
+function pushSales_(ctx) {
+  let sh = null;
+  for (let i = 0; i < SALES_TABS.length && !sh; i++) sh = ctx.ss.getSheetByName(SALES_TABS[i]);
+  if (!sh) return { ok: false, error: 'Monthly sales tab not found' };
+  const lastRow = sh.getLastRow();
+  const lastCol = Math.min(sh.getLastColumn(), 26);
+  if (lastRow < 1 || lastCol < 1) return { ok: true, saved: 0 };
+  const values = sh.getRange(1, 1, lastRow, lastCol).getDisplayValues();
+  const rows = values.map((v, i) => ({ row: i + 1, values: v }));
+  return callEdge_({ action: 'sales_push', department: 'RARE_DISEASE', rows: rows });
 }
 
 function refreshMirror_() {

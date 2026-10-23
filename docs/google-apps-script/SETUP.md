@@ -26,6 +26,7 @@ account that owns the sheets.
 | Someone clicks **Sync sheet** in the dashboard | Full sync on demand. |
 | Dashboard update (stage, payment, hold…) | Shown in the sheet's **CT Stage (dashboard)** / **CT Last update** columns and the CT Export tab at the next sync. |
 | Someone picks a stage in the **CT Stage (dashboard)** dropdown | The dashboard is set to exactly that stage (forward or back) within seconds. |
+| Recordati only: any edit in **Monthy Sales Data**, and every full sync | The whole tab is copied to the dashboard's **Monthly sales** page (admin + Recordati users only). |
 
 Three columns are added at the right end of the tab: **CT Shipment ID**, **CT Stage (dashboard)**, **CT Last update**.
 Please don't edit or delete them; the shipment ID is what keeps each sheet row tied to the same shipment

@@ -3,6 +3,7 @@
 //  POST {action:"push"}     from Apps Script (x-sync-secret) : sheet rows → shipments; returns CT values to write back
 //  POST {action:"mirror"}   from Apps Script (x-sync-secret) : returns the read-only "CT Export (Supabase)" table
 //  POST {action:"register"} from Apps Script (x-sync-secret) : stores the sheet's web-app URL
+//  POST {action:"sales_push"} from Apps Script (x-sync-secret): Recordati "Monthy Sales Data" tab -> monthly_sales (full replace)
 //  POST {action:"sync"}     from the dashboard (user JWT)    : asks each sheet's Apps Script web app to run a full sync
 //
 // Secrets live in private.sync_config (read via get_sync_config(), service role only). The browser never sees them.
@@ -21,6 +22,7 @@ import {
   type SheetRecord,
   type Stage,
 } from './mapping.ts';
+import { parseSales } from './sales.ts';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -444,7 +446,7 @@ Deno.serve(async (req) => {
   }
   try {
     const secret = req.headers.get('x-sync-secret') ?? String(body.secret ?? '');
-    if (body.action === 'push' || body.action === 'mirror' || body.action === 'register') {
+    if (body.action === 'push' || body.action === 'mirror' || body.action === 'register' || body.action === 'sales_push') {
       const cfg = await config();
       if (!safeEqual(secret, cfg.SHEET_SYNC_SECRET ?? '')) return json({ error: 'unauthorised' }, 401);
       if (body.action === 'mirror') return await mirror(body.department as Department);
@@ -455,6 +457,15 @@ Deno.serve(async (req) => {
         if (error) return json({ error: 'The web app URL must end in /exec (Deploy > Manage deployments > Web app URL).' }, 400);
         configCache = null;
         return json({ ok: true });
+      }
+      if (body.action === 'sales_push') {
+        if (body.department !== 'RARE_DISEASE') return json({ error: 'Monthly sales are only kept for Recordati.' }, 400);
+        const rows = body.rows as { row: number; values: unknown[] }[];
+        if (!Array.isArray(rows) || rows.length > 5000) return json({ error: 'bad payload' }, 400);
+        const parsed = parseSales(rows);
+        const { data, error } = await admin.rpc('replace_monthly_sales', { p_department: 'RARE_DISEASE', p_rows: parsed });
+        if (error) return json({ error: 'Could not save monthly sales.' }, 500);
+        return json({ ok: true, saved: data, withMonth: parsed.filter((r) => r.sale_month).length });
       }
       return await push(body as unknown as Parameters<typeof push>[0]);
     }

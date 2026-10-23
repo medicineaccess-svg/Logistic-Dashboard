@@ -10,6 +10,7 @@ import { ShipmentDetail } from './pages/ShipmentDetail';
 import { Payments } from './pages/Payments';
 import { Stock } from './pages/Stock';
 import { Reports } from './pages/Reports';
+import { MonthlySales } from './pages/MonthlySales';
 import { Team } from './pages/Team';
 import { Audit } from './pages/Audit';
 import { SettingsPage } from './pages/Settings';
@@ -41,6 +42,7 @@ export function App() {
       <Route path="/payments" element={<Protected><Payments /></Protected>} />
       <Route path="/stock" element={<Protected><Stock /></Protected>} />
       <Route path="/reports" element={<Protected><Reports /></Protected>} />
+      <Route path="/sales" element={<Protected><MonthlySales /></Protected>} />
       <Route path="/team" element={<Protected adminOnly><Team /></Protected>} />
       <Route path="/audit" element={<Protected adminOnly><Audit /></Protected>} />
       <Route path="/settings" element={<Protected adminOnly><SettingsPage /></Protected>} />
